@@ -45,6 +45,7 @@ import org.mockito.Mock;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
@@ -121,6 +122,21 @@ public class MainActivityTest {
                 matches(withText(item.getName())).check(view.findViewById(R.id.tv_super_hero_name),e);
             }
         });
+    }
+
+    @Test public void JORGE_shouldShowAllElementsWhenSuperHeroesExists(){
+        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(10);
+
+        startActivity();
+
+        RecyclerViewInteraction.<SuperHero>onRecyclerView(withId(R.id.recycler_view)).withItems(superHeroes).check(
+                new RecyclerViewInteraction.ItemViewAssertion<SuperHero>() {
+                    @Override
+                    public void check(SuperHero item, View view, NoMatchingViewException e) {
+                        matches(hasDescendant(withText(item.getName()))).check(view, e);
+                    }
+                }
+        )
     }
 
     private ArrayList<SuperHero> givenSomeSuperHeroes(int numberOfSuperHeroes) {
