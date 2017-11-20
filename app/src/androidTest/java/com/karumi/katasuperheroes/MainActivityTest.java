@@ -28,20 +28,18 @@ import com.karumi.katasuperheroes.di.MainComponent;
 import com.karumi.katasuperheroes.di.MainModule;
 import com.karumi.katasuperheroes.model.SuperHero;
 import com.karumi.katasuperheroes.model.SuperHeroesRepository;
-import com.karumi.katasuperheroes.recyclerview.RecyclerItemViewAssertion;
 import com.karumi.katasuperheroes.recyclerview.RecyclerViewInteraction;
 import com.karumi.katasuperheroes.ui.view.MainActivity;
-
-import it.cosenonjaviste.daggermock.DaggerMockRule;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+import it.cosenonjaviste.daggermock.DaggerMockRule;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -49,8 +47,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-
 import static junit.framework.Assert.assertEquals;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.when;
 
@@ -90,7 +88,7 @@ public class MainActivityTest {
 
     @Test
     public void shouldNotShowEmptyCaseIfThereAreNoSuperHeroes() {
-        givenSomeSuperHeroes(10);
+        givenSomeSuperHeroes(10, false);
 
         startActivity();
 
@@ -99,7 +97,7 @@ public class MainActivityTest {
 
     @Test
     public void shouldShowSameNumberOfRowsIntoRecyclerView() {
-        givenSomeSuperHeroes(10);
+        givenSomeSuperHeroes(10, false);
 
         MainActivity mainActivity = startActivity();
 
@@ -111,21 +109,65 @@ public class MainActivityTest {
     }
 
 
-    @Test public void shouldShowListOfSuperHeroesNames() {
-        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(3);
+    @Test
+    public void shouldShowListOfSuperHeroesNames() {
+        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(3, false);
 
         startActivity();
 
         RecyclerViewInteraction.<SuperHero>onRecyclerView(withId(R.id.recycler_view)).withItems(superHeroes).check(new RecyclerViewInteraction.ItemViewAssertion<SuperHero>() {
             @Override
             public void check(SuperHero item, View view, NoMatchingViewException e) {
-                matches(withText(item.getName())).check(view.findViewById(R.id.tv_super_hero_name),e);
+
+
+                matches(withText(item.getName())).check(view.findViewById(R.id.tv_super_hero_name), e);
             }
         });
     }
 
-    @Test public void JORGE_shouldShowAllElementsWhenSuperHeroesExists(){
-        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(10);
+
+    @Test
+    public void shouldShowAvengerBadge() {
+        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(10, true);
+
+        startActivity();
+
+        RecyclerViewInteraction.<SuperHero>onRecyclerView(withId(R.id.recycler_view)).withItems(superHeroes).check(new RecyclerViewInteraction.ItemViewAssertion<SuperHero>() {
+            @Override
+            public void check(SuperHero item, View view, NoMatchingViewException e) {
+                if (item.isAvenger()) {
+                    matches(hasDescendant(allOf(withId(R.id.iv_avengers_badge), isDisplayed()))).check(view, e);
+                } else {
+                    matches(hasDescendant(allOf(withId(R.id.iv_avengers_badge), not(isDisplayed())))).check(view, e);
+
+                }
+            }
+        });
+
+
+    }
+
+    @Test
+    public void shouldNotShowAvengerBadge() {
+        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(10, false);
+
+        startActivity();
+
+        RecyclerViewInteraction.<SuperHero>onRecyclerView(withId(R.id.recycler_view)).withItems(superHeroes).check(new RecyclerViewInteraction.ItemViewAssertion<SuperHero>() {
+            @Override
+            public void check(SuperHero item, View view, NoMatchingViewException e) {
+
+                matches(hasDescendant(allOf(withId(R.id.iv_avengers_badge), not(isDisplayed())))).check(view, e);
+
+            }
+        });
+    }
+
+
+
+    @Test
+    public void JORGE_shouldShowAllElementsWhenSuperHeroesExists() {
+        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(10, false);
 
         startActivity();
 
@@ -136,14 +178,14 @@ public class MainActivityTest {
                         matches(hasDescendant(withText(item.getName()))).check(view, e);
                     }
                 }
-        )
+        );
     }
 
-    private ArrayList<SuperHero> givenSomeSuperHeroes(int numberOfSuperHeroes) {
+    private ArrayList<SuperHero> givenSomeSuperHeroes(int numberOfSuperHeroes, boolean isAvengers) {
         ArrayList<SuperHero> superHeroes = new ArrayList<>();
 
         for (int i = 0; i < numberOfSuperHeroes; ++i) {
-            SuperHero superHero = new SuperHero("name " + i, null, false, "description " + i);
+            SuperHero superHero = new SuperHero("name " + i, null, isAvengers, "description " + i);
 
             superHeroes.add(superHero);
         }
