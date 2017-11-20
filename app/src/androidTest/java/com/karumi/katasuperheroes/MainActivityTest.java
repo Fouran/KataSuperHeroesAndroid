@@ -17,14 +17,19 @@
 package com.karumi.katasuperheroes;
 
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.v7.widget.RecyclerView;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.view.View;
 
 import com.karumi.katasuperheroes.di.MainComponent;
 import com.karumi.katasuperheroes.di.MainModule;
 import com.karumi.katasuperheroes.model.SuperHero;
 import com.karumi.katasuperheroes.model.SuperHeroesRepository;
+import com.karumi.katasuperheroes.recyclerview.RecyclerItemViewAssertion;
+import com.karumi.katasuperheroes.recyclerview.RecyclerViewInteraction;
 import com.karumi.katasuperheroes.ui.view.MainActivity;
 
 import it.cosenonjaviste.daggermock.DaggerMockRule;
@@ -41,8 +46,10 @@ import org.mockito.Mock;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
+import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.when;
 
@@ -89,7 +96,34 @@ public class MainActivityTest {
         onView(withText("¯\\_(ツ)_/¯")).check(matches(not(isDisplayed())));
     }
 
-    private void givenSomeSuperHeroes(int numberOfSuperHeroes) {
+    @Test
+    public void shouldShowSameNumberOfRowsIntoRecyclerView() {
+        givenSomeSuperHeroes(10);
+
+        MainActivity mainActivity = startActivity();
+
+        RecyclerView list = (RecyclerView) mainActivity.findViewById(R.id.recycler_view);
+
+        assertEquals(10, list.getAdapter().getItemCount());
+
+
+    }
+
+
+    @Test public void shouldShowListOfSuperHeroesNames() {
+        ArrayList<SuperHero> superHeroes = givenSomeSuperHeroes(3);
+
+        startActivity();
+
+        RecyclerViewInteraction.<SuperHero>onRecyclerView(withId(R.id.recycler_view)).withItems(superHeroes).check(new RecyclerViewInteraction.ItemViewAssertion<SuperHero>() {
+            @Override
+            public void check(SuperHero item, View view, NoMatchingViewException e) {
+                matches(withText(item.getName())).check(view.findViewById(R.id.tv_super_hero_name),e);
+            }
+        });
+    }
+
+    private ArrayList<SuperHero> givenSomeSuperHeroes(int numberOfSuperHeroes) {
         ArrayList<SuperHero> superHeroes = new ArrayList<>();
 
         for (int i = 0; i < numberOfSuperHeroes; ++i) {
@@ -99,6 +133,8 @@ public class MainActivityTest {
         }
 
         when(repository.getAll()).thenReturn(superHeroes);
+
+        return superHeroes;
 
     }
 
