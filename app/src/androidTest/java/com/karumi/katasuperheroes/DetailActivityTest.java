@@ -86,7 +86,7 @@ public class DetailActivityTest {
    public void shouldBeShownCorrectName(){
        SuperHero superHero = givenSomeSuperHero();
 
-       startActivity();
+       startActivity(superHero);
 
        onView(withId(R.id.tv_super_hero_name)).check(matches(withText(superHero.getName())));
    }
@@ -102,19 +102,19 @@ public class DetailActivityTest {
        return superHero;
     }
 
-    private SuperHeroDetailActivity startActivity() {
+    private SuperHeroDetailActivity startActivity(SuperHero superHero) {
 
         Intent i = new Intent();
-        i.putExtra("super_hero_name_key", "ANY_NAME");
+        i.putExtra("super_hero_name_key", superHero.getName());
 
        return activityRule.launchActivity(i);
     }
 
     @Test
     public void shouldBeShownAvengerBadge(){
-        givenSomeSuperHero(true);
+        SuperHero superHero = givenSomeSuperHero(true);
 
-        startActivity();
+        startActivity(superHero);
 
         onView(withId(R.id.iv_avengers_badge)).check(matches(isDisplayed()));
 
@@ -122,10 +122,10 @@ public class DetailActivityTest {
 
     @Test
     public void shouldShowNameInToolbar(){
-        givenSomeSuperHero();
+        SuperHero superHero = givenSomeSuperHero();
 
-        startActivity();
+        startActivity(superHero);
 
-        ToolbarMatcher.onToolbarWithTitle("ANY_NAME");
+        ToolbarMatcher.onToolbarWithTitle(superHero.getName());
     }
 }
