@@ -135,12 +135,9 @@ public class MainActivityTest {
         RecyclerViewInteraction.<SuperHero>onRecyclerView(withId(R.id.recycler_view)).withItems(superHeroes).check(new RecyclerViewInteraction.ItemViewAssertion<SuperHero>() {
             @Override
             public void check(SuperHero item, View view, NoMatchingViewException e) {
-                if (item.isAvenger()) {
-                    matches(hasDescendant(allOf(withId(R.id.iv_avengers_badge), isDisplayed()))).check(view, e);
-                } else {
-                    matches(hasDescendant(allOf(withId(R.id.iv_avengers_badge), not(isDisplayed())))).check(view, e);
 
-                }
+                    matches(hasDescendant(allOf(withId(R.id.iv_avengers_badge), isDisplayed()))).check(view, e);
+
             }
         });
 
